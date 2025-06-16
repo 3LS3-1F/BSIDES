@@ -1,0 +1,142 @@
+\documentclass{beamer}
+\usetheme{metropolis}
+
+\usepackage{booktabs}
+\usepackage{graphicx}
+\usepackage{hyperref}
+
+\title{When Data Talks, We Let AI Listen}
+\subtitle{Using NLP to Predict the Severity of Software Vulnerabilities}
+\author{Léa Ulusan}
+\institute{CIRCL - Computer Incident Response Center Luxembourg}
+\date{BSides Luxembourg, June 19, 2025}
+
+\begin{document}
+
+\maketitle
+
+% Slide 2: Agenda
+\begin{frame}{Agenda}
+    \begin{itemize}
+        \item What is Vulnerability Lookup?
+        \item Challenges with vulnerability data
+        \item How we trained an AI model
+        \item Real-world usage
+        \item What's next?
+    \end{itemize}
+\end{frame}
+
+% Slide 3: Project
+\begin{frame}{Who is behind Vulnerability Lookup?}
+    \begin{itemize}
+        \item Open-source project by CIRCL
+        \item Co-funded by the European Union
+        \item Used by SOCs, CSIRTs, ENISA, and more
+        \item Helps contextualize and enrich vulnerability data
+    \end{itemize}
+\end{frame}
+
+% Slide 4: Motivation
+\begin{frame}{Why go beyond CVE and NVD?}
+    \begin{itemize}
+        \item Legacy tool: \texttt{cve-search}
+        \item NVD is no longer the only source
+        \item Real-world vulnerabilities emerge from:
+            \begin{itemize}
+                \item GitHub advisories
+                \item PyPI metadata
+                \item CSAF vendor feeds
+                \item Security blogs
+            \end{itemize}
+        \item We needed more scalability and correlation
+    \end{itemize}
+\end{frame}
+
+% Slide 5: Enhancements
+\begin{frame}{Making vulnerability data actionable}
+    \begin{itemize}
+        \item Collaborative features:
+            \begin{itemize}
+                \item Tags, bundles, and comments
+                \item Sightings (real-world observations)
+            \end{itemize}
+        \item But: No CVSS scores available for many entries
+        \item \textbf{Goal: Predict severity based only on description}
+    \end{itemize}
+\end{frame}
+
+% Slide 6: Dataset
+\begin{frame}{A constantly updated open-source dataset}
+    \begin{itemize}
+        \item >1 million correlated vulnerability records
+        \item Extracted from CIRCL's internal data pipeline
+        \item Fields:
+            \begin{itemize}
+                \item CVE ID, description, CVSS score/vector
+                \item Tags, CPEs, CWEs, timestamps
+            \end{itemize}
+        \item Published on Hugging Face: \texttt{CIRCL/vulnerability-scores}
+    \end{itemize}
+\end{frame}
+
+% Slide 7: Model
+\begin{frame}{Severity prediction with RoBERTa}
+    \begin{itemize}
+        \item Fine-tuned RoBERTa model (multi-class classification)
+        \item Input: CVE text description
+        \item Output: Severity level (Low / Medium / High / Critical)
+        \item Accuracy >90\% on recent CVEs
+        \item Example use case:
+            \begin{itemize}
+                \item CVE-2024-12345 → predicted as Critical with 98\% confidence
+            \end{itemize}
+    \end{itemize}
+\end{frame}
+
+% Slide 8: Deployment
+\begin{frame}{Production-ready: }
+    \begin{itemize}
+        \item FastAPI microservice to run models locally
+        \item REST API: send description, get predicted severity
+        \item Works offline — no sensitive data sent to the cloud
+        \item Integrated into:
+            \begin{itemize}
+                \item \texttt{vulnlookup-cli}
+                \item \texttt{vulnlookup-web}
+                \item CIRCL’s internal enrichment pipeline
+            \end{itemize}
+    \end{itemize}
+\end{frame}
+
+% Slide 9: What's next
+\begin{frame}{What’s next?}
+    \begin{itemize}
+        \item Improve CVE-to-CPE inference
+        \item Predict vulnerability types (CWEs)
+        \item Map to MITRE ATT\&CK tactics
+        \item Better prioritization for patching
+        \item Community contributions welcome!
+    \end{itemize}
+\end{frame}
+
+% Slide 10: References
+\begin{frame}{Open resources}
+    \begin{itemize}
+        \item Project website: \url{https://vulnerability.circl.lu}
+        \item Dataset: \url{https://huggingface.co/datasets/CIRCL/vulnerability-scores}
+        \item GitHub: \url{https://github.com/CIRCL}
+        \item License: Free and open-source (various)
+    \end{itemize}
+\end{frame}
+
+% Slide 11: Thank you
+\begin{frame}{Thank you!}
+    \begin{center}
+        Questions?\\[1em]
+        \texttt{lea.ulusan@circl.lu} \\
+        \texttt{@VulnLookup} on Mastodon \\
+        \texttt{https://vulnerability.circl.lu}
+    \end{center}
+\end{frame}
+
+\end{document}

@@ -1,0 +1,247 @@
+\documentclass[10pt,aspectratio=169, colorlinks=true, linkcolor=circlBlue]{beamer}
+
+\usetheme[numbering=fraction, progressbar=frametitle, tlp=clear]{circl}
+
+\usepackage{listings}
+\usepackage{minted}
+\usepackage{tikzpingus}
+\usepackage{coffeestains}
+
+
+\usepackage{awesomebox}
+
+\usepackage{hyperref}         % For hyperlinks in the document and PDF metadata
+\hypersetup{
+    pdftitle={When Data Talks, We Let AI Listen},    % Title
+    pdfauthor={Léa Ulusan},               % Author
+    pdfsubject={}, % Subject
+    pdfkeywords={CVD, CVE, Vulnerability}, % Keywords
+    colorlinks=false,                       % Color links instead of boxes
+    linkcolor=blue,                        % Color of internal links
+    citecolor=blue,                        % Color of citations
+    urlcolor=blue                          % Color of external links
+}
+
+\title{When Data Talks, We Let AI Listen}
+\subtitle{BSides Luxembourg}
+\date{2025/06/19}
+\author{Léa Ulusan}
+\institute{CIRCL}
+\projectlink{\faGithub \space https://www.vulnerability-lookup.org}
+
+
+\begin{document}
+
+% Title page
+\begin{frame}
+    \titlepage
+\end{frame}
+
+
+
+% --------- Summary ---------
+\setcounter{tocdepth}{2}
+\begin{frame}
+   \frametitle{Content at glance}
+   \tableofcontents
+\end{frame}
+\setcounter{tocdepth}{4}
+% ----------------------------
+
+
+% \section{Origin of the project}
+%\subsection{Who is behind Vulnerability Lookup?}
+\begin{frame}[t]{Who is behind Vulnerability Lookup?}
+	\awesomebox[circlRed]{2pt}{\faRocket}{circlBlue}{
+		Vulnerability-Lookup\footnote{\scriptsize{\url{https://www.vulnerability-lookup.org}}}
+		is an Open Source project led by \textbf{CIRCL}.
+
+		It is co-funded by \textbf{CIRCL} and the \textbf{European Union}\footnote{\scriptsize{\url{https://github.com/ngsoti}}}.
+
+		Used by many organisations including CSIRTs and ENISA (EUVD).
+	}
+
+  \begin{tikzpicture}
+    
+    \pingu[wings wave, heart=blue, xshift=1cm]
+    \pingu[wings wave, heart=yellow, xshift=3cm]
+  \end{tikzpicture}
+\end{frame}
+
+\subsection{Origin and Challenges we aim to address}
+\begin{frame}[t]{Origin and Challenges we aim to address}
+    Origin:
+  \begin{itemize}
+    \item \texttt{cve-search}\footnote{\scriptsize{\url{https://github.com/cve-search/cve-search}}} is an open-source tool initially developed in late 2012, focusing on maintaining a \textbf{local} CVE database.
+    \item \texttt{cve-search} is widely used as an \textbf{internal} tool.
+  \end{itemize}
+  \bigskip
+  Challenges:
+  \begin{itemize}
+    \item The design and scalability of \texttt{cve-search} are limited. Our operational public instance at \url{https://cve.circl.lu} is reaching a hard limit of 20,000 queries per second.
+    \item Vulnerability sources have \textbf{diversified}, and the \textbf{NVD CVE is no longer the sole source of vulnerability information}.
+  \end{itemize}
+\end{frame}
+
+\begin{frame}{Making vulnerability data actionable}
+\begin{columns}
+    \begin{column}{0.55\textwidth}
+        \begin{itemize}
+            \item Collaborative features:
+            \begin{itemize}
+                \item Tags, bundles, and comments
+                \item Sightings (real-world observations)
+            \end{itemize}
+            \bigskip
+            \item But: Many vulnerabilities have no CVSS score
+            \bigskip
+            \item Goal: Predict severity based only on the description
+        \end{itemize}
+    \end{column}
+    \begin{column}{0.45\textwidth}
+        \begin{figure}
+            \centering
+            \includegraphics[width=0.8\linewidth]{cvsss.png}
+            \label{fig:enter-label}
+        \end{figure}
+    \end{column}
+\end{columns}
+\end{frame}
+
+
+\begin{frame}{A constantly updated dataset}
+    \begin{itemize}
+        \item Over 1 million correlated vulnerability records
+        \item Extracted from CIRCL's internal data pipeline
+        \item Includes:
+        \begin{itemize}
+            \item CVE ID, description, CVSS score
+            \item Tags, CPEs, CWEs, timestamps
+        \end{itemize}
+        \item Published on Hugging Face:
+        \url{https://huggingface.co/datasets/CIRCL/vulnerability-scores}
+    \end{itemize}
+\end{frame}
+
+\begin{frame}[c]{Severity prediction with RoBERTa}
+    \begin{center}
+        \begin{minipage}{0.9\linewidth}
+            \begin{itemize}
+                \item Fine-tuned RoBERTa model
+                \item Input: CVE text description
+                \item Output: Severity level (Low, Medium, High, Critical)
+                \item Achieves over 90\% accuracy on recent CVEs
+                \item Example: \texttt{CVE-2025-44897} → \textbf{Critical} (98\% confidence)
+            \end{itemize}
+            \vfill
+            \begin{figure}
+                \centering
+                \includegraphics[width=0.7\linewidth]{percent.png}
+            \end{figure}
+        \end{minipage}
+    \end{center}
+\end{frame}
+
+
+\begin{frame}{Ready for production: }
+    \centering
+    \includegraphics[width=0.6\linewidth]{erwr.png}
+\end{frame}
+
+\begin{frame}{Ready for production: }
+    \centering
+    \includegraphics[width=0.6\linewidth]{image.png}
+\end{frame}
+
+\begin{frame}{What’s next?}
+    \begin{itemize}
+        \item CVE-to-CPE inference
+        \item Predict vulnerability type (CWE)
+        \item Map to MITRE ATT\&CK tactics
+        \item Help prioritize patching
+        \item Open to community contributions!
+    \end{itemize}
+\end{frame}
+
+
+
+
+
+
+\begin{frame}[fragile]
+  \frametitle{Improving threat intelligence}
+  \begin{itemize}
+  \item \textbf{Bundles:} Allow to combine similar vulnerabilities.
+    \item \textbf{Comments:} Provide additional context (PoC, remediations, etc.).
+    \item \textbf{Tags:} Attach tags to comments from the MISP vuln taxonomy\footnote{\scriptsize{\url{https://www.misp-project.org/taxonomies.html\#\_vulnerability\_3}}}.
+    \begin{minted}[fontsize=\scriptsize, bgcolor=bg]{ini}
+    vulnerability:information=remediation
+    \end{minted}
+%    \item \textbf{Sightings:} Allowing users to report whether they have witnessed an event, including the date, source of the sighting, and the object.
+    \item \textbf{Sightings:} Provide observations on vulnerabilities.
+  \end{itemize}
+  \begin{minted}[fontsize=\fontsize{6.9}{8}, bgcolor=bg, tabsize=2, highlightlines={5-6}]{json}
+    {
+      "uuid": "99c0bf75-48c6-41ac-a26f-572752dffd27",
+      "vulnerability_lookup_origin": "1a89b78e-f703-45f3-bb86-59eb712668bd",
+      "author": "8dfa6142-8c6d-4072-953e-71c85404aefb",
+      "vulnerability": "CVE-2023-39328",
+      "type": "exploited",
+      "creation_timestamp": "2024-10-22T16:27:23.729320Z"
+    }
+  \end{minted}
+\end{frame}
+
+
+
+% \section{Technical considerations}
+\begin{frame}
+    \frametitle{Vulnerability Lookup high level architecture}
+    \begin{figure}[H]
+        \centering
+        \includegraphics[width=0.6\textwidth]{img/vulnerability-lookup.png}
+%         \caption{Vulnerability Lookup high level architecture}
+        \label{fig:vuln-lookup-architecture}
+    \end{figure}
+\end{frame}
+
+
+\section{Closing}
+\begin{frame}
+  \frametitle{Future development}
+  \begin{itemize}
+    \item Conclusion
+  \end{itemize}
+  \awesomebox[circlRed]{2pt}{\faLightbulb}{circlBlue}{
+    As the project is still in its early stages and evolving rapidly, we are eager to receive feedback and feature suggestions.
+  }
+\end{frame}
+
+
+
+
+\begin{frame}
+    \frametitle{References}
+    \faHome \hspace{0.2cm} \url{https://vulnerability.circl.lu} \\
+
+    \bigskip
+    \faGithub \hspace{0.2cm} \url{https://github.com/vulnerability-lookup/vulnerability-lookup} \\
+
+    \bigskip
+    \faBook \hspace{0.2cm} \url{https://www.vulnerability-lookup.org} \\
+
+    \bigskip
+    \faMastodon \hspace{0.2cm} \url{https://social.circl.lu/@circl}
+\end{frame}
+
+\begin{frame}
+    \frametitle{Thank you for your attention}
+    \begin{itemize}
+      \item Issues, new sources or ideas: \url{https://github.com/vulnerability-lookup/vulnerability-lookup}
+      \item For support and questions, contact: \href{mailto:info@circl.lu}{info@circl.lu}
+    \end{itemize}
+\end{frame}
+
+\end{document}
+
+%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%

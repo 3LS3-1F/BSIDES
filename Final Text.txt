@@ -1,0 +1,104 @@
+# BSIDES 2025 - Léa - When Data Talks, We Let AI Listen
+
+### Slide 1
+
+## Introduction
+
+Hey folks! Good afternoon!
+I'm Léa Ulusan, a 3rd-year Cybersecurity student in Paris and currently diving into AI as an intern with the awesome CIRCL team. (The adventure doesn’t stop there, I’ll be joining them full-time as an engineer once I graduate! 🎊 bahahha)
+
+In the framework of this 4 months internship my contributions will mainly impact the Vulnerability-Lookup project. 
+
+### Slide 2
+Let's keep the intro short, this session will walk through:
+
+- (The challenges of working with messy, real-world vulnerability data)
+- How we’re building AI models, using AI to structure, score severity, and make sense of it
+- What we’ve learned, and what’s next.
+
+### Slide 3
+
+VL is an open source project lead by CIRCL, with more than 500 users in total, including CSIRTs and ENISA, and it is funded by the european union !
+
+### Slide 4 
+
+Initially, there was CVE-Search, a project developed in late 2012, which is like the mother of Vulnerability-Lookup. This project was designed to be used internally and only support one source of vulnerabilities, from the NVD. And the online instance (which is not online anymore) used to also slow due to a heavy load. 
+
+But! nowadays vulnerability sources have diversified. This is why Vulnerability Lookup came to life! We now have more than 20 sources in our new tool which make up to more than a million of security advisories aggregated and correlated, and the instance is much quicker.
+
+### Slide 5
+Now Real-world data is far from being perfect. Lots of missing information, various formats, non valid JSON files, etc. So it is really complicated to find the information we need.
+
+That's why we decided to give a change to AI, always keeping in mind that AI is a tool, not a solution on its own! That's why we plan to build various models in a realistic fashion and by always improving.
+We have already various use cases of tasks that could be achieved with NLP models. For example, one of our first goals is to predict the severity of a vulnerability only based on it's description.
+
+### Slide 6
+
+To achieve that, we created a dataset with our million of vulnerabilities, including informations about CVE ids, descriptions, and already existing cvss scores. 
+And by the way this dataset is available on our Hugging Face platform, free to use for anyone.
+
+### Slide 7
+
+## Workflow of models generation
+
+Then the models are generated using our own GPUs in house and our open-source trainers. Like the datasets, model updates are performed regularly. We created VulnTrain, which has 3 principal tasks : generating datasets, providing a set of trainers and validating models. You can install VulnTrain on github and use it if you have your own datasets.
+So here first every day we call VulnTrain to update our dataset with every new vulnerabilities, then that dataset is pushed on Hugging Face to make everything open source and then we pull that newly made dataset in VulTrain again to now create models using our GPUs which is then also pushed on HF to make it available so u can use it too!
+
+1. Generating and Sharing Datasets
+2. Trainers and Models
+
+
+### Slide 8
+
+So we created a roberta based-model, it's purpose if to classify vulnerabilities and find the severity of a vulnerability with only its description and with more than 90 percent of accuracy ! 
+
+### Slide 9
+
+## Putting Our Models to Work in Vulnerability-Lookup
+
+To use this AI model in Vulnerability-Lookup, we built a small extra tool called ML-Gateway.
+
+ML-Gateway is a lightweight web server written in Python using FastAPI. It comes with built-in documentation and runs locally with VL. 
+
+You can think of ML-Gateway as a simple bridge between VL and the AI models. It lets us add more models later on without making VL more complicated.
+
+We did this to keep AI-related code and dependencies out of the main VL project. That means VL stays clean and easy to install. If you want to use the AI features, just install ML-Gateway—it’s on GitHub.
+
+The VL backend just sends an internal request to ML-Gateway and gets the result back. 
+
+### Slide 10
+
+We have other model ideas in mind, like CWE guesser and ways to guess how to fix vulnerabilities by analyzing git commits, and many more! 
+
+### Slide 11
+
+So to conclude, we are just getting started with AI and we are planning to do so much more! If you ever wanna be part of this journey you can! every project is open source and you can be a contributor too ! don't hesitate ! 
+
+well this was my first talk ever, thank you for listening! 
+
+
+
+
+
+\\\\\\\\\\\\\\\\\\\\\
+Example:
+
+```bash
+$ curl -X 'POST' \
+  'https://vulnerability.circl.lu/api/vlai/severity-classification' \
+  -H 'accept: application/json' \
+  -H 'Content-Type: application/json' \
+  -d '{
+  "description": "An authentication bypass in the API component of Ivanti Endpoint Manager Mobile 12.5.0.0 and prior allows attackers to access protected resources without proper credentials via the API."
+}'
+{"severity": "High", "confidence": 0.6008}
+```
+
+\\\\\\\\\\\\\\\\\\\\\
+
+
+
+
+``/api/vlai/severity-classification`` -> the gateway knows that it must use the model dedicated to severity classification, and will transfer the input from the client (ie: a user or the web interface).
+
+As example ``/api/vlai/mitigations`` would involve a model dedicated to provide insights about mitigations related to a vulnerability (a model trained with commit messaages from patches found in vulnerability advisories).
